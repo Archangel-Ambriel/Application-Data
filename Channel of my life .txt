@@ -1,0 +1,15 @@
+Merge commit 'd06ab72a146be1a5975d351e747cebe9f2b5357a'
+
+Conflicts:
+	RELEASE-NOTES
+	src/channel.c
+	src/comp.c
+	src/kex.c
+	src/packet.c
+	src/sftp.c
+	src/transport.c
+	src/userauth.c
+
+
+https://github.com/libssh2/libssh2 3587304
+
