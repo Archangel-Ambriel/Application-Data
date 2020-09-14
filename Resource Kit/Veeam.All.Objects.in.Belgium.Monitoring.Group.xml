@@ -1,0 +1,475 @@
+﻿<?xml version="1.0" encoding="utf-8"?><ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="1.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.All.Objects.in.Belgium.Monitoring.Group</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam All Objects in Belgium Monitoring Group</Name>
+    <References>
+      <Reference Alias="MicrosoftSystemCenterInstanceGroupLibrary7585010">
+        <ID>Microsoft.SystemCenter.InstanceGroup.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VeeamVirtExtensionsVMwareLibrary6501542">
+        <ID>Veeam.Virt.Extensions.VMware.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemLibrary7585010">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenter">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="Veeam.Belgium.Monitoring.Group" Accessibility="Public" Abstract="false" Base="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" Extension="false" />
+        <ClassType ID="Veeam.Belgium.Monitoring.vCenters.Group" Accessibility="Public" Abstract="false" Base="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" Extension="false" />
+      </ClassTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="Veeam.Belgium.Monitoring.Group.DiscoveryRule" Enabled="true" Target="Veeam.Belgium.Monitoring.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenter!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Veeam.Belgium.Monitoring.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterEvents"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="3">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMDATA_CENTER"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="2">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMCCR"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMCCR"]/monitoringGroup$</Property>
+                  </ValueExpression>
+                  <Operator>MatchesWildcard</Operator>
+                  <Pattern>Belgium</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]/monitoringGroup$</Property>
+                  </ValueExpression>
+                  <Operator>MatchesWildcard</Operator>
+                  <Pattern>Belgium</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                  </ValueExpression>
+                  <Operator>MatchesWildcard</Operator>
+                  <Pattern>Belgium</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMPOOL"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="2">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMVAPP"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="2">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterNetwork"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="3">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterStorage"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="4">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMDSCLUSTER"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="2">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMDATASTORE"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="1">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMDATASTORE.SIOCSDRS"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="1">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOSTSWITCH"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="1">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMDVSWITCH"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="1">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+      <Discovery ID="Veeam.Belgium.Monitoring.vCenters.Group.DiscoveryRule" Enabled="true" Target="Veeam.Belgium.Monitoring.vCenters.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenter!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Veeam.Belgium.Monitoring.vCenters.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterEvents"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="3">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMHOST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterNetwork"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="3">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.vCenterStorage"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <Contains maxDepth="4">
+                  <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+                  <Expression>
+                    <SimpleExpression>
+                      <ValueExpression>
+                        <Property>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]/monitoringGroup$</Property>
+                      </ValueExpression>
+                      <Operator>Equal</Operator>
+                      <ValueExpression>
+                        <Value>Belgium</Value>
+                      </ValueExpression>
+                    </SimpleExpression>
+                  </Expression>
+                </Contains>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+  </Monitoring>
+  <Presentation>
+    <Views>
+      <View ID="View_Veeam.Belgium.Monitoring.Group" Accessibility="Public" Enabled="true" Target="Veeam.Belgium.Monitoring.vCenters.Group" TypeID="SystemCenter!Microsoft.SystemCenter.DiagramViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria />
+        <Presentation>
+          <DiagramViewCriteria>
+            <DiagramViewDisplay ShowVirtualGroup="false">
+              <NodesPerRow>3</NodesPerRow>
+              <LevelsToShow>3</LevelsToShow>
+              <ContainmentLine>
+                <Color />
+                <SourceArrow IsFilled="false">
+                  <ArrowStyle>NoAnchor</ArrowStyle>
+                </SourceArrow>
+                <TargetArrow IsFilled="false">
+                  <ArrowStyle>ArrowAnchor</ArrowStyle>
+                </TargetArrow>
+              </ContainmentLine>
+              <NonContainmentLine>
+                <Color Red="6" Green="134" Blue="253" />
+                <SourceArrow IsFilled="false">
+                  <ArrowStyle>NoAnchor</ArrowStyle>
+                </SourceArrow>
+                <TargetArrow IsFilled="false">
+                  <ArrowStyle>ArrowAnchor</ArrowStyle>
+                </TargetArrow>
+                <LineStyle>DashDotDot</LineStyle>
+              </NonContainmentLine>
+            </DiagramViewDisplay>
+          </DiagramViewCriteria>
+        </Presentation>
+        <Target>$MPElement[Name="Veeam.Belgium.Monitoring.vCenters.Group"]$</Target>
+      </View>
+    </Views>
+    <Folders>
+      <Folder ID="Folder_Veeam.All.Objects.in.Belgium.Monitoring.Group" Accessibility="Public" ParentFolder="SystemCenter!Microsoft.SystemCenter.Monitoring.ViewFolder.Root" />
+    </Folders>
+    <FolderItems>
+      <FolderItem ID="View_Veeam.Belgium.Monitoring.Group_ID" ElementID="View_Veeam.Belgium.Monitoring.Group" Folder="Folder_Veeam.All.Objects.in.Belgium.Monitoring.Group" />
+    </FolderItems>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.All.Objects.in.Belgium.Monitoring.Group">
+          <Name>Veeam All Objects in Belgium Monitoring Group</Name>
+          <Description>You can logically group specific Collectors into monitoring groups in the Veeam UI. The Veeam All Objects in Belgium Monitoring Group MP dynamically includes objects discovered on these Collectors into groups in the Ops Mgr console. You can later use Ops Mgr User Roles to give users different permissions to see objects in that group.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Folder_Veeam.All.Objects.in.Belgium.Monitoring.Group">
+          <Name>Veeam All Objects in Belgium Monitoring Group</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Belgium.Monitoring.Group">
+          <Name>Veeam Objects in Belgium Monitoring Group</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Belgium.Monitoring.vCenters.Group">
+          <Name>Veeam vCenter objects in Belgium Monitoring Group</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Belgium.Monitoring.Group.DiscoveryRule">
+          <Name>Populate Veeam Objects in Belgium Monitoring Group</Name>
+          <Description>This discovery rule populates the group 'Veeam Objects in Belgium Monitoring Group'</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Belgium.Monitoring.vCenters.Group.DiscoveryRule">
+          <Name>Populate Veeam Objects in Belgium Monitoring Group</Name>
+          <Description>This discovery rule populates the group 'Veeam vCenter objects in Belgium Monitoring Group'</Description>
+        </DisplayString>
+        <DisplayString ElementID="View_Veeam.Belgium.Monitoring.Group">
+          <Name>Belgium Monitoring Group Topology View</Name>
+          <Description />
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.All.Objects.in.Belgium.Monitoring.Group" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>You can logically group specific Collectors into monitoring groups in the Veeam UI. The Veeam All Objects in Belgium Monitoring Group MP dynamically includes objects discovered on these Collectors into groups in the Ops Mgr console. You can later use Ops Mgr User Roles to give users different permissions to see objects in that group.</maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of all Rules and Monitors and full set of User Guides for the Veeam MP for System Center.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

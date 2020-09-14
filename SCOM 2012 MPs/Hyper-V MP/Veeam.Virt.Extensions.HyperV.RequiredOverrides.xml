@@ -1,0 +1,229 @@
+<ManagementPack ContentReadable="true" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Virt.Extensions.HyperV.RequiredOverrides</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam Hyper-V Required Overrides</Name>
+    <References>
+      <Reference Alias="MSIGL">
+        <ID>Microsoft.SystemCenter.InstanceGroup.Library</ID>
+        <Version>6.1.7221.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenterLib">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>6.1.7221.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference> 
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>6.1.7221.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEHL">
+        <ID>Veeam.Virt.Extensions.HyperV.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEHM">
+        <ID>Veeam.Virt.Extensions.HyperV.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group" Accessibility="Public" Abstract="false" Base="MSIGL!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" />
+        <ClassType ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group" Accessibility="Public" Abstract="false" Base="MSIGL!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" />
+      </ClassTypes>
+      <RelationshipTypes>
+        <RelationshipType ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.Contains.VirtualMachine" Accessibility="Public" Abstract="false" Base="System!System.Containment">
+          <Source>Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group</Source>
+          <Target>VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine</Target>
+        </RelationshipType>
+        <RelationshipType ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.Contains.VirtualMachine" Accessibility="Public" Abstract="false" Base="System!System.Containment">
+          <Source>Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group</Source>
+          <Target>VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine</Target>
+        </RelationshipType>
+      </RelationshipTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule" Enabled="true" Target="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.Contains.VirtualMachine" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenterLib!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.Contains.VirtualMachine"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine"]/VMName$</Property>
+                  </ValueExpression>
+                  <Operator>MatchesRegularExpression</Operator>
+                  <Pattern>^.+_replica$</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+      <Discovery ID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.DiscoveryRule" Enabled="true" Target="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.Contains.VirtualMachine" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenterLib!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.Contains.VirtualMachine"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VVEHL!Veeam.Virt.Extensions.HyperV.VirtualMachine"]/UsesNetworks$</Property>
+                  </ValueExpression>
+                  <Operator>ContainsSubstring</Operator>
+                  <Pattern>Lab Isolated Network</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Overrides>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.HyperV.VM.IntegrationServices.Monitor.Disable" Context="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group" ContextInstance="e389b1c7-000e-b64e-ab9d-40b7be330603" Enforced="false" Monitor="VVEHM!Veeam.Virt.Extensions.HyperV.VM.IntegrationServices.Monitor" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.HyperV.VM.Monitor.SnapshotAgeSize.Disable" Context="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group" ContextInstance="e389b1c7-000e-b64e-ab9d-40b7be330603" Enforced="false" Monitor="VVEHM!Veeam.Virt.Extensions.HyperV.VM.Monitor.SnapshotAgeSize" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides">
+          <Name>Veeam Hyper-V Required Overrides</Name>
+          <Description>
+            This MP contains overrides for Veeam Backup &amp; Replication monitoring
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group">
+          <Name>Veeam Backup and Replication replica VMs (Hyper-V)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.Contains.VirtualMachine">
+          <Name>Veeam Backup and Replication replica VMs (Hyper-V) Group contains Hyper-V Virtual Machine (Veeam MP)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule">
+          <Name>Populate Veeam Backup and Replication replica VMs (Hyper-V)</Name>
+          <Description>This discovery rule populates the group 'Veeam Backup and Replication replica VMs (Hyper-V)'</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group">
+          <Name>Veeam Backup and Replication Virtual Labs (Hyper-V)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.Contains.VirtualMachine">
+          <Name>Veeam Backup and Replication Virtual Labs (Hyper-V) Group contains Hyper-V Virtual Machine (Veeam MP)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.DiscoveryRule">
+          <Name>Populate Veeam Backup and Replication Virtual Labs (Hyper-V)</Name>
+          <Description>This discovery rule populates the group 'Veeam Backup and Replication Virtual Labs (Hyper-V)'</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This MP contains overrides required for environments protected by Veeam Backup &amp; Replication.</maml:para>
+              <maml:para>See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_reference/" /></maml:navigationLink> and <maml:navigationLink><maml:linkText>User Guide</maml:linkText><maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_guide/" /></maml:navigationLink> for the Veeam Hyper-V MP.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule  populates a group 'Veeam Backup and Replication replica VMs (Hyper-V)' that contains virtual machines identified as Veeam Backup &amp; Replication replicas.</maml:para>
+              <maml:para>By default, the group is populated with VMs which have the '_replica' suffix in their names. However you can change the membership rule or add specific replica VMs manually.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>The 'Veeam Backup and Replication replica VMs (Hyper-V)' group is used for targeting overrides for other rules and monitors. This group allows you to disable alerts that are expected to fire against replica VMs in the environment protected by Veeam Backup &amp; Replication.</maml:para>
+              <maml:para>By default, this group does not include any overrides. However, in case the 'Veeam HyperV: VM Checkpoint Analysis' monitor starts generating unwanted alerts during replication jobs, you may need to create an override to adjust thresholds or disable the monitor.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of <maml:navigationLink>
+                  <maml:linkText>all Rules and Monitors</maml:linkText>
+                  <maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_reference/" />
+                </maml:navigationLink> and <maml:navigationLink>
+                  <maml:linkText>User Guide</maml:linkText>
+                  <maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_guide/" />
+                </maml:navigationLink> for the Veeam Hyper-V MP.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Microsoft Online Documentation</maml:linkText>
+                  <maml:uri href="http://technet.microsoft.com/en-us/library/hh831531.aspx" />
+                </maml:navigationLink> for more information on Microsoft Hyper-V.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.HyperV.RequiredOverrides.Backup.VirtualLabs.Group.DiscoveryRule" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule  populates a group 'Veeam Backup and Replication Virtual Labs (Hyper-V)' that contains virtual machines connected to Veeam Backup &amp; Virtual Labs.</maml:para>
+              <maml:para>By default, the group is populated with VMs which use 'Lab Isolated Network'. However you can change the membership rule or add specific Virtual Labs VMs manually.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>The 'Veeam Backup and Replication Virtual Labs (Hyper-V)' group is used for targeting overrides for other rules and monitors. This group allows you to disable alerts that are expected to fire against Virtual Labs VMs in the environment protected by Veeam Backup &amp; Replication.</maml:para>
+              <maml:para>By default, this group already includes overrides for the 'Veeam HyperV: VM Checkpoint Analysis' and 'Veeam HyperV: VM Integration Services Status' monitors. In case any other monitor starts generating unwanted alerts during SureBackup jobs, you may need to create an override to adjust thresholds or disable the monitor.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of <maml:navigationLink>
+                  <maml:linkText>all Rules and Monitors</maml:linkText>
+                  <maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_reference/" />
+                </maml:navigationLink> and <maml:navigationLink>
+                  <maml:linkText>User Guide</maml:linkText>
+                  <maml:uri href="http://helpcenter.veeam.com/mp/70/hyperv_guide/" />
+                </maml:navigationLink> for the Veeam Hyper-V MP.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Microsoft Online Documentation</maml:linkText>
+                  <maml:uri href="http://technet.microsoft.com/en-us/library/hh831531.aspx" />
+                </maml:navigationLink> for more information on Microsoft Hyper-V.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

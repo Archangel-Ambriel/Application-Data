@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="1.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Disable.All.VM.Workflows</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam Disable All VM Workflows</Name>
+    <References>
+      <Reference Alias="Virt">
+        <ID>Veeam.Virt.Extensions.VMware.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="MicrosoftSystemCenterInstanceGroupLibrary7585010">
+        <ID>Microsoft.SystemCenter.InstanceGroup.Library</ID>
+        <Version>7.5.0.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VeeamVirtExtensionsVMwareLibrary6501542">
+        <ID>Veeam.Virt.Extensions.VMware.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenter">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.0.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="UINameSpace34492fc913614751be481694d6634526.Group" Accessibility="Public" Abstract="false" Base="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" Extension="false" />
+      </ClassTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="UINameSpace34492fc913614751be481694d6634526.Group.DiscoveryRule" Enabled="true" Target="UINameSpace34492fc913614751be481694d6634526.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenter!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="UINameSpace34492fc913614751be481694d6634526.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VeeamVirtExtensionsVMwareLibrary6501542!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="MicrosoftSystemCenterInstanceGroupLibrary7585010!Microsoft.SystemCenter.InstanceGroupContainsEntities"]$</RelationshipClass>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <Value>True</Value>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>False</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Overrides>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.GroupEvents.VM.Error.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.GroupEvents.VM.Error" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.GroupEvents.VM.Warning.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.GroupEvents.VM.Warning" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.commands.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.commands" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.commandsFailed.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.commandsFailed" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuCoStopPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuCoStopPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuLatency.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuLatency" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuReadyPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuReadyPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuSwapWaitPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuSwapWaitPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuUsageMhz.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuUsageMhz" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuUsedPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.cpuUsedPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.diskMaxTotalLatency.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.diskMaxTotalLatency" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.droppedPacketsTotal.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.droppedPacketsTotal" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.freeSpace.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.freeSpace" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryActive.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryActive" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryActivePct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryActivePct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryBalloonPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryBalloonPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryLatency.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryLatency" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryMaximum.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryMaximum" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memorySwapRate.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memorySwapRate" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryUsedPct.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.memoryUsedPct" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.readLatency.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.readLatency" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.snapshotAge.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.snapshotAge" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.snapshotsSize.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.snapshotsSize" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalDiskIOPS.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalDiskIOPS" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalDiskUsageRate.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalDiskUsageRate" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalNetUsageRate.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.totalNetUsageRate" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.usedStorage.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.usedStorage" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.usedStorageDatastore.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.usedStorageDatastore" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Collect.writeLatency.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Collect.writeLatency" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.CollectEvents.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.CollectEvents" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Disk.Collect.outstandingIOs.DisableRule" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Rule="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Disk.Collect.outstandingIOs" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceStateChanged.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceStateChanged" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceVLockStepIntervalStatusChanged.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceVLockStepIntervalStatusChanged" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC51Alarm.VM.ConsolidationNeededStatus.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC51Alarm.VM.ConsolidationNeededStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.StorageCompliance.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.StorageCompliance" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.HAfailoverFailed.toRed.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC5Alarm.HAfailoverFailed.toRed" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.NoCompatibleHostForSecondaryVM.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.NoCompatibleHostForSecondaryVM" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.TimedOutStartingSecondaryVM.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.TimedOutStartingSecondaryVM" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.vSphereHAVMMonitoring.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.vSphereHAVMMonitoring" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.vCenterEvents.DrsRuleViolation.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.vCenterEvents.DrsRuleViolation" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuScheduling.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuScheduling" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuUsage.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuUsage" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.DiskSpace.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.DiskSpace" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.LatencyAnalysis.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.LatencyAnalysis" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryBallooningAndSwapping.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryBallooningAndSwapping" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryUsage.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryUsage" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.StorageLatency.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.StorageLatency" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.Uptime.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.Uptime" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.MigrationError.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.MigrationError" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.VMError.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.VMError" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldVM.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldVM" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldEndpointSVM.DisableMonitor" Context="UINameSpace34492fc913614751be481694d6634526.Group" Enforced="false" Monitor="Virt!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldEndpointSVM" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Disable.All.VM.Workflows">
+          <Name>Veeam Disable All VM Workflows</Name>
+          <Description>The Veeam Disable All VM Workflows MP creates a ‘Veeam Unmonitored VMs’ group for VMs whose monitoring should be disabled. Then the management pack disables all virtual machine workflows including performance and event collection rules.</Description>
+        </DisplayString>
+        <DisplayString ElementID="UINameSpace34492fc913614751be481694d6634526.Group">
+          <Name>Veeam Unmonitored VMs</Name>
+        </DisplayString>
+        <DisplayString ElementID="UINameSpace34492fc913614751be481694d6634526.Group.DiscoveryRule">
+          <Name>Populate Veeam Unmonitored VMs</Name>
+          <Description>This discovery rule populates the group 'Veeam Unmonitored VMs'</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Disable.All.VM.Workflows" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>The Veeam Disable All VM Workflows MP creates a ‘Veeam Unmonitored VMs’ group for VMs whose monitoring should be disabled. Then the management pack disables all virtual machine workflows including performance and event collection rules.</maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of all Rules and Monitors and full set of User Guides for the Veeam MP for System Center.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

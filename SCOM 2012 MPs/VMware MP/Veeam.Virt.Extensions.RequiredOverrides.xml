@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack SchemaVersion="2.0" ContentReadable="true" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Virt.Extensions.RequiredOverrides</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam.Virt.Extensions.RequiredOverrides</Name>
+    <References>
+      <Reference Alias="MSIGL">
+        <ID>Microsoft.SystemCenter.InstanceGroup.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenterLib">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8427.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEVD">
+        <ID>Veeam.Virt.Extensions.VMware.Discovery</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEVL">
+        <ID>Veeam.Virt.Extensions.VMware.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEVM">
+        <ID>Veeam.Virt.Extensions.VMware.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group" Accessibility="Public" Abstract="false" Base="MSIGL!Microsoft.SystemCenter.InstanceGroup" Hosted="false" Singleton="true" />
+      </ClassTypes>
+      <RelationshipTypes>
+        <RelationshipType ID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.ContainsVMGUEST" Accessibility="Public" Abstract="false" Base="System!System.Containment">
+          <Source ID="SRC" Type="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group" />
+          <Target ID="TGT" Type="VVEVL!Veeam.Virt.Extensions.VMware.VMGUEST" />
+        </RelationshipType>
+      </RelationshipTypes>
+    </EntityTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule" Enabled="true" Target="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryRelationship TypeID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.ContainsVMGUEST" />
+        </DiscoveryTypes>
+        <DataSource ID="GroupPopulationDataSource" TypeID="SystemCenterLib!Microsoft.SystemCenter.GroupPopulator">
+          <RuleId>$MPElement$</RuleId>
+          <GroupInstanceId>$MPElement[Name="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group"]$</GroupInstanceId>
+          <MembershipRules>
+            <MembershipRule>
+              <MonitoringClass>$MPElement[Name="VVEVL!Veeam.Virt.Extensions.VMware.VMGUEST"]$</MonitoringClass>
+              <RelationshipClass>$MPElement[Name="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.ContainsVMGUEST"]$</RelationshipClass>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <Property>$MPElement[Name="VVEVL!Veeam.Virt.Extensions.VMware.VMGUEST"]/reserved1$</Property>
+                  </ValueExpression>
+                  <Operator>DoesNotMatchRegularExpression</Operator>
+                  <Pattern>^$</Pattern>
+                </RegExExpression>
+              </Expression>
+            </MembershipRule>
+          </MembershipRules>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Overrides>
+      <RuleConfigurationOverride ID="Veeam.Virt.Extensions.VMware.GroupEvents.VM.Error.Replica.Override" Context="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group" ContextInstance="47ee6415-0c1f-fb0f-d5ee-22f104bfecb7" Enforced="false" Rule="VVEVM!Veeam.Virt.Extensions.VMware.GroupEvents.VM.Error" Parameter="ExcludeEvents" Module="DS">
+        <Value>com.vmware.vc.sms.datastore.ComplianceStatusNonCompliantEvent|VmMacConflictEvent</Value>
+      </RuleConfigurationOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize.Disable" Context="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group" ContextInstance="47ee6415-0c1f-fb0f-d5ee-22f104bfecb7" Enforced="false" Monitor="VVEVM!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <DiscoveryConfigurationOverride ID="Veeam.Virt.Extensions.VMware.Topology.Discovery.Datastore.BackupDatastore.Override" Context="VVEVL!Veeam.Virt.Extensions.VMware.VMHOSTDATASTORE.Container" Enforced="false" Discovery="VVEVD!Veeam.Virt.Extensions.VMware.Topology.Discovery.Datastore" Parameter="ExcludeDatastoresByDatastoreName" Module="eventDiscovery">
+        <Value>Veeambackup*</Value>
+      </DiscoveryConfigurationOverride>
+      <DiscoveryConfigurationOverride ID="Veeam.Virt.Extensions.VMware.Topology.Discovery.VM.BackupDatastore.Override" Context="VVEVL!Veeam.Virt.Extensions.VMware.VMGuestContainerLSChild" Enforced="false" Discovery="VVEVD!Veeam.Virt.Extensions.VMware.Topology.Discovery.VM" Parameter="ExcludeVMsByDatastoreName" Module="eventDiscovery">
+        <Value>Veeambackup*</Value>
+      </DiscoveryConfigurationOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group">
+          <Name>Veeam Backup and Replication replica VMs (VMware)</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.ContainsVMGUEST">
+          <Name>Veeam Backup and Replication replica VMs (VMware) Group contains Veeam VMware Virtual Machine</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule">
+          <Name>Populate Veeam Backup and Replication replica VMs (VMware)</Name>
+          <Description>This discovery rule populates the group 'Veeam Backup and Replication replica VMs (VMware)'.</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.RequiredOverrides">
+          <Name>Veeam VMware Required Overrides</Name>
+          <Description>
+            This MP contains overrides for Veeam Backup &amp; Replication monitoring.
+          </Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.RequiredOverrides" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This MP contains overrides required for environments protected by Veeam Backup &amp; Replication.</maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.RequiredOverrides.Backup.ReplicaVM.Group.DiscoveryRule" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule  populates a group 'Veeam Backup and Replication replica VMs' that contains virtual machines identified as Veeam Backup &amp; Replication replicas.</maml:para>
+              <maml:para>By default, the group is populated with VMs which have non-empty 'Veeam Backup Replica Source' property. However you can change the membership rule or add specific VMs manually.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Configuration</maml:title>
+              <maml:para>The 'Veeam Backup and Replication replica VMs' group is used for targeting overrides for other rules and monitors. This group allows you to disable alerts that are expected to fire against replica VMs in the environment protected by Veeam Backup &amp; Replication.</maml:para>
+              <maml:para>By default, this group includes the following overrides: </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Disable duplicate MAC address conflict error events for the 'Veeam VMware: Virtual Machine Error' rule.</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Disable the 'Veeam VMware: Virtual Machine Snapshot Usage Analysis' monitor.</maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

@@ -1,0 +1,353 @@
+﻿<?xml version="1.0" encoding="utf-8"?><ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="1.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Virt.Extensions.HyperV.Monitoring.Interval.15min.Overrides</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam.Virt.Extensions.HyperV.Monitoring.Interval.15min.Overrides</Name>
+    <References>
+      <Reference Alias="Virt2">
+        <ID>Veeam.Virt.Extensions.HyperV.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Virt">
+        <ID>Veeam.Virt.Extensions.VMware.BaseDiscovery</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Windows">
+        <ID>Microsoft.Windows.Library</ID>
+        <Version>7.0.0.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Virt3">
+        <ID>Veeam.Virt.Extensions.HyperV.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Virt1">
+        <ID>Veeam.Virt.Extensions.HyperV.Discovery</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenter">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.0.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <Monitoring>
+    <Overrides>      
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVSMBRulefreePctForContextVeeamVirtExtensionsHyperVSMBVolume958301b384774e4499091101399ebe10" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.SMBRule.freePct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostClusterDiskMonitorStateForContextVeeamVirtExtensionsHyperVHostClusterDiskafcc3dc059674340a6c233b9d35bce73" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostClusterDisk" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.HostClusterDisk.Monitor.State" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVSMBVolumeMonitorAvailabilityForContextVeeamVirtExtensionsHyperVSMBVolume01cd97cf0555426f8c5be49a216c3644" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.SMBVolume.Monitor.Availability" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostSMBVolumeMonitorAvailabilityForContextVeeamVirtExtensionsHyperVHostSMBVolume4c7b2428ac26479c93ef99953c82ba23" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostSMBVolume" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.HostSMBVolume.Monitor.Availability" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVClusterMonitorMemoryUsedPctForContextVeeamVirtExtensionsHyperVCluster00bf0306f8634dbaa7575640ce66fc7b" Context="Virt2!Veeam.Virt.Extensions.HyperV.Cluster" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Cluster.Monitor.MemoryUsedPct" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVClusterDiskMonitorStateForContextVeeamVirtExtensionsHyperVClusterDisk0ddb97640ec343bfaabb3f4fdd4cd798" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusterDisk" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.ClusterDisk.Monitor.State" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVCSVMonitorHighestLatencyForContextVeeamVirtExtensionsHyperVClusterDiskd81aca46f1684ce984233528c1eed132" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusterDisk" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.CSV.Monitor.HighestLatency" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVCSVMonitorFreeSpaceForContextVeeamVirtExtensionsHyperVClusteredSharedVolume3310a0d07ef5483eb463f8de4467df38" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusteredSharedVolume" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.CSV.Monitor.FreeSpace" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostMonitorCPUSchedulingForContextVeeamVirtExtensionsHyperVServerRole41c7cc57a3f941d6a08bb017ca109bb8" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.Monitor.CPUScheduling" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostMonitorMemoryUsedPctForContextVeeamVirtExtensionsHyperVServerRolee11fe1d18ba44c53a34cf4c5ecfcbd14" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.Monitor.MemoryUsedPct" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVLocalDiskMonitorHighestLatencyForContextVeeamVirtExtensionsHyperVLocalDisk23f830f187da4f4f8882f90d7d96fc81" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalDisk" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.LocalDisk.Monitor.HighestLatency" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVLocalVolumeMonitorFreeSpaceForContextVeeamVirtExtensionsHyperVLocalStorageVolume5064c44719c24366b25c21cfb4c47ee1" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalStorageVolume" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.LocalVolume.Monitor.FreeSpace" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVNetworkContainerMonitorForContextVeeamVirtExtensionsHyperVNetworkAdapterContainer41f2def2d63640bc98f48bbbe6f2ccab" Context="Virt2!Veeam.Virt.Extensions.HyperV.NetworkAdapterContainer" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.NetworkContainer.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVNetworkAdapterMonitorForContextVeeamVirtExtensionsHyperVpNetworkAdapterc4f2e0b923be4759995d027050107ac5" Context="Virt2!Veeam.Virt.Extensions.HyperV.pNetworkAdapter" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.NetworkAdapter.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostpNicMonitorOutputQueueLengthForContextVeeamVirtExtensionsHyperVpNetworkAdapter70130c1252694b9bbc3abe6c4032c2b8" Context="Virt2!Veeam.Virt.Extensions.HyperV.pNetworkAdapter" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.pNic.Monitor.OutputQueueLength" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVTeamedNetworkAdapterMonitorForContextVeeamVirtExtensionsHyperVTeamedpNetworkAdapter46daffbe7a534804963dda00331a551b" Context="Virt2!Veeam.Virt.Extensions.HyperV.TeamedpNetworkAdapter" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.TeamedNetworkAdapter.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVHostvNicMonitorOutputQueueLengthForContextVeeamVirtExtensionsHyperVvNetworkAdapter5fe4b3bd82e64a1c98b6744a2dabb850" Context="Virt2!Veeam.Virt.Extensions.HyperV.vNetworkAdapter" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.vNic.Monitor.OutputQueueLength" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVSMBVolumeMonitorFreeSpaceForContextVeeamVirtExtensionsHyperVSMBVolume4335ee71bb6641ac9d729b65a61a33df" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.SMBVolume.Monitor.FreeSpace" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMClusterResourceGroupStatusMonitorForContextVeeamVirtExtensionsHyperVVirtualMachinea3ad1822491d47989d14f96459d154f3" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.ClusterResourceGroupStatus.Monitor" Parameter="IntervalSeconds">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMIntegrationServicesMonitorForContextVeeamVirtExtensionsHyperVVirtualMachine2a388ff094d0450baf12858329a9f2c7" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.IntegrationServices.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorHealthForContextVeeamVirtExtensionsHyperVVirtualMachinecf017bf536e1406d82ad1c19fff7017b" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.Health" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorHeartbeatForContextVeeamVirtExtensionsHyperVVirtualMachine49d9360542044ebab079b5457800a8f8" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.Heartbeat" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>      
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorAvgDispatchWaitTimeForContextVeeamVirtExtensionsHyperVVirtualMachineb83623f8ff2342ddb95f39f02294b35e" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.AvgDispatchWaitTime" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorGuestRunTimeForContextVeeamVirtExtensionsHyperVVirtualMachine680c4b6a20cb4fefa22a74e26e57b7df" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.GuestRunTime" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorAveragePressureForContextVeeamVirtExtensionsHyperVVirtualMachine52a8dcd44e0241dc99da2546f6d2b5eb" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.AveragePressure" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVVMMonitorErrorCountForContextVeeamVirtExtensionsHyperVVirtualMachine60db94b1607f4e498425475042ecec37" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.VM.Monitor.ErrorCount" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVvSwitchUplinkMonitorForContextVeeamVirtExtensionsHyperVvSwitch6534c67ebe1e4ea0b0fb82680ae3504e" Context="Virt2!Veeam.Virt.Extensions.HyperV.vSwitch" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.vSwitchUplink.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorVeeamVirtExtensionsHyperVAgentProxyMonitorForContextVeeamVirtExtensionsHyperVVESHostWatcherff023d4576d74e82b665ef1a9b8aad23" Context="Virt2!Veeam.Virt.Extensions.HyperV.VESHostWatcher" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.AgentProxy.Monitor" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="Aliasb7b2ace4c3014de3b99243edc5b50cffOverrideForMonitorVeeamVirtExtensionsHyperVClusterMonitorCPUUsedPctForContextVeeamVirtExtensionsHyperVCluster" Context="Virt2!Veeam.Virt.Extensions.HyperV.Cluster" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Cluster.Monitor.CPUUsedPct" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="Alias608c68748bf44778b2dc444d6d92fbcfOverrideForMonitorVeeamVirtExtensionsHyperVHostMonitorPagesPerSecForContextVeeamVirtExtensionsHyperVServerRole" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.Monitor.PagesPerSec" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="Aliasdf6de618f9bb49c2b44baa0761ea87c0OverrideForMonitorVeeamVirtExtensionsHyperVHostMonitorTotalRunTimeForContextVeeamVirtExtensionsHyperVServerRole" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Monitor="Virt3!Veeam.Virt.Extensions.HyperV.Host.Monitor.TotalRunTime" Parameter="Frequency">
+        <Value>900</Value>
+      </MonitorConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVClusterRuleMemoryusedPctForContextVeeamVirtExtensionsHyperVClusterde31db1199e04283ab77822b1950fb5e" Context="Virt2!Veeam.Virt.Extensions.HyperV.Cluster" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.ClusterRule.Memory.usedPct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVClusterRuleCPUusedPctForContextVeeamVirtExtensionsHyperVClustere1d72336b6f54a18831ecab8dc156cc4" Context="Virt2!Veeam.Virt.Extensions.HyperV.Cluster" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.ClusterRule.CPU.usedPct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleClusterDiskIOPSForContextVeeamVirtExtensionsHyperVClusterDisk7e30bcca971d490bb363a18a3178c824" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.ClusterDisk.IOPS" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleClusterDiskMBPSForContextVeeamVirtExtensionsHyperVClusterDisk8fa659c605704ce894300f1e7b31981d" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.ClusterDisk.MBPS" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRulehighestLatencyForContextVeeamVirtExtensionsHyperVClusterDisk26777c4db9564ed88d21dcd575bc80c7" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.highestLatency" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleFreeSpaceForContextVeeamVirtExtensionsHyperVClusteredSharedVolume4ff8fbc5711c47a78d9a29b9ddc2d80d" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusteredSharedVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.FreeSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleFreePctForContextVeeamVirtExtensionsHyperVClusteredSharedVolume8437b6cebb944aaa8d3dcf6a8c42d583" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusteredSharedVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.FreePct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleVMsInStateVMSavedForContextVeeamVirtExtensionsHyperVServerRole1eced6e3cc63457097b9a0af47f952e1" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.VMsInState.VMSaved" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUUsageMHzForContextVeeamVirtExtensionsHyperVServerRole7022ab78a68540ae99c6398276bd72ca" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.UsageMHz" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleMemoryUsedMBForContextVeeamVirtExtensionsHyperVServerRolef3a396dc0528466db79cec57c47a07f0" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.Memory.UsedMB" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleVMsInStateVMPoweredOffForContextVeeamVirtExtensionsHyperVServerRole367dd64698a6414685e46bf9854d5fff" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.VMsInState.VMPoweredOff" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUVirtualProcessorsForContextVeeamVirtExtensionsHyperVServerRolee37def531769454d84e73b16e8f47cd2" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.VirtualProcessors" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleVMsInStateVMPausedForContextVeeamVirtExtensionsHyperVServerRole3ee051644a304c33b46b3fbd35a6faca" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.VMsInState.VMPaused" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUProcessorQueueLengthForContextVeeamVirtExtensionsHyperVServerRoleeb1ebf7f6e184dea8352fa30be8b0763" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.ProcessorQueueLength" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUContextSwitchesForContextVeeamVirtExtensionsHyperVServerRole27195dc0e9964536a4c884244887bbef" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.ContextSwitches" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleVMsInStateVMTotalForContextVeeamVirtExtensionsHyperVServerRole553d0c6e831c4a1eaa56b597d0aef9ba" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.VMsInState.VMTotal" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUAvgDispatchWaitTimePctForContextVeeamVirtExtensionsHyperVServerRolee759ee434ac644c6b4c5e842946dc134" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.AvgDispatchWaitTimePct" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleMemoryAvailableMemoryForContextVeeamVirtExtensionsHyperVServerRole4e32582d44864492b9424130b0c945f0" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.Memory.AvailableMemory" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleMemoryAveragePressureForContextVeeamVirtExtensionsHyperVServerRole4800a797ff2749868f76f2de7e47d15d" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.Memory.AveragePressure" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUHypervisorRunTimeForContextVeeamVirtExtensionsHyperVServerRoleed25c2b8fa3047d7b9f8d418f1f3b60b" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.HypervisorRunTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleMemoryPagesPersecForContextVeeamVirtExtensionsHyperVServerRolef0f6cd9ed0e9472caf914d255bcacafc" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.Memory.PagesPersec" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUTotalRunTimeForContextVeeamVirtExtensionsHyperVServerRole4ae74c55309e469585f101d0639714f5" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.TotalRunTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleCPUMaxDispatchWaitTimePctForContextVeeamVirtExtensionsHyperVServerRoleea1dab9375ba45d1aaafe52623e5cd06" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.CPU.MaxDispatchWaitTimePct" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleVMsInStateVMRunningForContextVeeamVirtExtensionsHyperVServerRole66ea3f87a5a3471c8c6d13569a33ba3e" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.VMsInState.VMRunning" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRuleMemoryUsedPctForContextVeeamVirtExtensionsHyperVServerRoleb30b6063ed874a018c4a825e77fd191d" Context="Virt2!Veeam.Virt.Extensions.HyperV.ServerRole" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.Memory.UsedPct" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleReadLatencyForContextVeeamVirtExtensionsHyperVHostClusterDiskb318ed58eaa94b8a94280772bda3aa60" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.ReadLatency" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleIOPSForContextVeeamVirtExtensionsHyperVHostClusterDisk960abdfb1a7e4004bdb279fbb58e8369" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.IOPS" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleWriteLatencyForContextVeeamVirtExtensionsHyperVHostClusterDisk07363577221f4fe786841f8d5f6b2d0c" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.WriteLatency" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleMBPSForContextVeeamVirtExtensionsHyperVHostClusterDiskc9b1b4c2f65d4e39954fd77fb054818d" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostClusterDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.MBPS" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVLocalDiskIOPSForContextVeeamVirtExtensionsHyperVLocalDisk2d04e72140c043ca97e19ebf861ad8f7" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.LocalDisk.IOPS" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVLocalDiskUsageMBForContextVeeamVirtExtensionsHyperVLocalDisk11fd7c82088940b8bbcedefb4d3a0d32" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.LocalDisk.UsageMB" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVLocalDiskLatencyForContextVeeamVirtExtensionsHyperVLocalDisk246a6928ea3849499be37e6daf3bff5b" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalDisk" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.LocalDisk.Latency" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVLocalVolumeFreePctForContextVeeamVirtExtensionsHyperVLocalStorageVolumea20c2eac5a844917b4582dd3fb0df918" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalStorageVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.LocalVolume.FreePct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVLocalVolumeFreeSpaceForContextVeeamVirtExtensionsHyperVLocalStorageVolume4b78c53b79f148a896d71378c55d160e" Context="Virt2!Veeam.Virt.Extensions.HyperV.LocalStorageVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.LocalVolume.FreeSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRulepNicOutputQueueLengthForContextVeeamVirtExtensionsHyperVpNetworkAdapter52d79ba231ef49af9db938091fdf4414" Context="Virt2!Veeam.Virt.Extensions.HyperV.pNetworkAdapter" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.pNic.OutputQueueLength" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostSMBVolumeFreeSpaceForContextVeeamVirtExtensionsHyperVHostSMBVolume3463f780a5ff4f699f1a81dcdd426f8e" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostSMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostSMBVolume.FreeSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostSMBVolumeFreePctForContextVeeamVirtExtensionsHyperVHostSMBVolumefe84262739c54087a1fd914ab2586e1f" Context="Virt2!Veeam.Virt.Extensions.HyperV.HostSMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostSMBVolume.FreePct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVHostRulevNicOutputQueueLengthForContextVeeamVirtExtensionsHyperVvNetworkAdapter534a31adda4a4e5dab38d0ecb1b53c7a" Context="Virt2!Veeam.Virt.Extensions.HyperV.vNetworkAdapter" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.HostRule.vNic.OutputQueueLength" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVSMBRulefreeSpaceForContextVeeamVirtExtensionsHyperVSMBVolume61bb221173294a24827ca417d7aac43a" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.SMBRule.freeSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKIOPSForContextVeeamVirtExtensionsHyperVVirtualMachine29d9f36973e643e0818e7281a421aa02" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.IOPS" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKTotalKBsForContextVeeamVirtExtensionsHyperVVirtualMachinee21958d539b84b849f9efbfcf44fc34a" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.TotalKBs" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKIOPSByInstanceForContextVeeamVirtExtensionsHyperVVirtualMachine17e75ec1e89b48d99790a958f75719c9" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.IOPS.ByInstance" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUAvgDispatchWaitTimeForContextVeeamVirtExtensionsHyperVVirtualMachine1dd319e79d14405c95e41c359321ecc2" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.AvgDispatchWaitTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUHypervisorRunTimeForContextVeeamVirtExtensionsHyperVVirtualMachine8a9c14d0d6ab41b9af43c7218dc22d91" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.HypervisorRunTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRulePhysicalMemoryForContextVeeamVirtExtensionsHyperVVirtualMachine11663d8ec0854961bed977b57fc33a4f" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.PhysicalMemory" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>      
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUGuestRunTimeForContextVeeamVirtExtensionsHyperVVirtualMachinee941def9ebe74c6bb0a8787c885f820b" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.GuestRunTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKErrorCountByInstanceForContextVeeamVirtExtensionsHyperVVirtualMachine5157c6187df84223a85a3b7afedefb45" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.ErrorCount.ByInstance" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKTotalKBsByInstanceForContextVeeamVirtExtensionsHyperVVirtualMachineff22096a1fdc48bba2d4391bf84dcdb8" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.TotalKBs.ByInstance" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKHighestLatencyTotalForContextVeeamVirtExtensionsHyperVVirtualMachinef706fbea1a7a488ab5fe8b16eb33ac0b" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.HighestLatency.Total" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleGuestVisiblePhysicalMemoryForContextVeeamVirtExtensionsHyperVVirtualMachine4165a412e7eb48538627ec283a70045c" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.GuestVisiblePhysicalMemory" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>      
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleNETTotalKBsForContextVeeamVirtExtensionsHyperVVirtualMachine2fd631374a3a4d3288a3e96bd89e9739" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.NET.TotalKBs" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKFlushCountTotalForContextVeeamVirtExtensionsHyperVVirtualMachine1f2fcb7953964ccaad798108d234c451" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.FlushCount.Total" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKHighestLatencyByInstanceForContextVeeamVirtExtensionsHyperVVirtualMachinebb43593b14994ec884c0c100118d4ec7" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.HighestLatency.ByInstance" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleAveragePressureForContextVeeamVirtExtensionsHyperVVirtualMachine2323e898d4e140f6a5e725e984ad45ae" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.AveragePressure" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKErrorCountTotalForContextVeeamVirtExtensionsHyperVVirtualMachinec65bd21b5b534e0aa132b66a33af89dd" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.ErrorCount.Total" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUCPUUsageMHzForContextVeeamVirtExtensionsHyperVVirtualMachine3ce4c00aceac45cebb9fa79af6824271" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.CPUUsageMHz" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUMaxDispatchWaitTimeForContextVeeamVirtExtensionsHyperVVirtualMachine9682f7f412bf44ffafa521656f30cf60" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.MaxDispatchWaitTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleCPUTotalRunTimeForContextVeeamVirtExtensionsHyperVVirtualMachineb3d96b85cea649f7b4dbf4dd9cf748f7" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.CPU.TotalRunTime" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVVMRuleDISKFlushCountForContextVeeamVirtExtensionsHyperVVirtualMachine3a68b943d4b74f4991d2a0aaa3a19e7b" Context="Virt2!Veeam.Virt.Extensions.HyperV.VirtualMachine" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.VMRule.DISK.FlushCount" Parameter="Frequency" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleUsedSpaceForContextVeeamVirtExtensionsHyperVClusteredSharedVolume4ff8fbc5711c47a78d9a29b9ddc2d80d" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusteredSharedVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.UsedSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVCSVRuleUsedPctForContextVeeamVirtExtensionsHyperVClusteredSharedVolume8437b6cebb944aaa8d3dcf6a8c42d583" Context="Virt2!Veeam.Virt.Extensions.HyperV.ClusteredSharedVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.CSVRule.UsedPct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVSMBRuleUsedPctForContextVeeamVirtExtensionsHyperVSMBVolume958301b384774e4499091101399ebe10" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.SMBRule.usedPct" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleVeeamVirtExtensionsHyperVSMBRuleUsedSpaceForContextVeeamVirtExtensionsHyperVSMBVolume61bb221173294a24827ca417d7aac43a" Context="Virt2!Veeam.Virt.Extensions.HyperV.SMBVolume" Enforced="false" Rule="Virt3!Veeam.Virt.Extensions.HyperV.SMBRule.usedSpace" Parameter="IntervalSeconds" Module="DS">
+        <Value>900</Value>
+      </RuleConfigurationOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Virt.Extensions.HyperV.Monitoring.Interval.15min.Overrides">
+          <Name>Veeam Hyper-V Increased Performance Collection Interval</Name>
+          <Description>The Veeam Hyper-V Increased Performance Collection Interval MP contains overrides for a list of Veeam Hyper-V performance collection rules. Normally, these rules collect data every 5 minutes. When imported, the MP changes the default 'IntervalSeconds' setting to 15 minutes. This allows you to reduce space consumed in Ops Mgr databases and decrease load on both Ops Mgr agent and Management Server.</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.HyperV.Monitoring.Interval.15min.Overrides" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>The Veeam Hyper-V Increased Performance Collection Interval MP contains overrides for a list of Veeam Hyper-V performance collection rules. Normally, these rules collect data every 5 minutes. When imported, the MP changes the default 'IntervalSeconds' setting to 15 minutes. This allows you to reduce space consumed in Ops Mgr databases and decrease load on both Ops Mgr agent and Management Server.</maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of all Rules and Monitors and full set of User Guides for the Veeam MP for System Center.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

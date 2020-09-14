@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="1.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Disable.VM.Alerts</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam Disable VM Alerts</Name>
+    <References>
+      <Reference Alias="Virt1">
+        <ID>Veeam.Virt.Extensions.VMware.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Virt">
+        <ID>Veeam.Virt.Extensions.VMware.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenter">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <Monitoring>
+    <Overrides>
+      <RulePropertyOverride ID="OverrideForRuleVeeamVirtExtensionsVMwareGroupEventsVMWarningForContextVeeamVirtExtensionsVMwareVMGUEST7a1af1351c4c4b40808b4996a5d913c0" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Rule="Virt1!Veeam.Virt.Extensions.VMware.GroupEvents.VM.Warning" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <RulePropertyOverride ID="OverrideForRuleVeeamVirtExtensionsVMwareGroupEventsVMErrorForContextVeeamVirtExtensionsVMwareVMGUEST297eebce221c4c5681112027cdce2cd1" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Rule="Virt1!Veeam.Virt.Extensions.VMware.GroupEvents.VM.Error" Property="Enabled">
+        <Value>false</Value>
+      </RulePropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceStateChanged.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceStateChanged" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceVLockStepIntervalStatusChanged.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC4Alarm.VM.FaultToleranceVLockStepIntervalStatusChanged" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC51Alarm.VM.ConsolidationNeededStatus.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC51Alarm.VM.ConsolidationNeededStatus" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.StorageCompliance.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.StorageCompliance" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.HAfailoverFailed.toRed.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC5Alarm.HAfailoverFailed.toRed" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.NoCompatibleHostForSecondaryVM.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.NoCompatibleHostForSecondaryVM" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.TimedOutStartingSecondaryVM.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.TimedOutStartingSecondaryVM" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC5Alarm.VM.vSphereHAVMMonitoring.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC5Alarm.VM.vSphereHAVMMonitoring" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.vCenterEvents.DrsRuleViolation.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.vCenterEvents.DrsRuleViolation" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuScheduling.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuScheduling" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuUsage.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.cpuUsage" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.DiskSpace.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.DiskSpace" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.LatencyAnalysis.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.LatencyAnalysis" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryBallooningAndSwapping.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryBallooningAndSwapping" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryUsage.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.memoryUsage" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.snapshotAgeAndSize" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.StorageLatency.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.StorageLatency" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.Uptime.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VMGUEST.Monitor.Uptime" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.MigrationError.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.MigrationError" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.VMError.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.VMError" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldVM.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldVM" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldEndpointSVM.DisableAlert" Context="Virt!Veeam.Virt.Extensions.VMware.VMGUEST" Enforced="false" Monitor="Virt1!Veeam.Virt.Extensions.VMware.VC55Alarm.VM.vShieldEndpointSVM" Property="GenerateAlert">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Disable.VM.Alerts">
+          <Name>Veeam Disable VM Alerts</Name>
+          <Description>The Veeam Disable All Alerts MP disables all alerts from VMs in your environment. However, health state will still be monitored (VMs will change state, but no alerts will be generated), and events and performance metrics for these VMs will still be collected.</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Disable.VM.Alerts" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>The Veeam Disable All Alerts MP disables all alerts from VMs in your environment. However, health state will still be monitored (VMs will change state, but no alerts will be generated), and events and performance metrics for these VMs will still be collected.</maml:para>
+              <maml:para>
+                See the <maml:navigationLink>
+                  <maml:linkText>Help Center</maml:linkText>
+                  <maml:uri href="http://www.veeam.com/documentation-guides-datasheets.html?prd=mp" />
+                </maml:navigationLink> for more information including reference lists of all Rules and Monitors and full set of User Guides for the Veeam MP for System Center.
+              </maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

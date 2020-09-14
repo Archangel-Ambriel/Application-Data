@@ -1,0 +1,2860 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack SchemaVersion="2.0" ContentReadable="true" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Manifest>
+    <Identity>
+      <ID>Veeam.Virt.Extensions.VMware.Monitoring.Hardware</ID>
+      <Version>8.0.0.2451</Version>
+    </Identity>
+    <Name>Veeam VMware Hardware Monitoring</Name>
+    <References>
+      <Reference Alias="SCDW">
+        <ID>Microsoft.SystemCenter.DataWarehouse.Library</ID>
+        <Version>7.0.8427.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SC">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8427.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Windows">
+        <ID>Microsoft.Windows.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemHealth">
+        <ID>System.Health.Library</ID>
+        <Version>7.0.8427.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VeeamVEVMwareLib">
+        <ID>Veeam.Virt.Extensions.VMware.Library</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VeeamVEVMwareMonitoring">
+        <ID>Veeam.Virt.Extensions.VMware.Monitoring</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VVEVVO2">
+        <ID>Veeam.Virt.Extensions.VMware.Views.OpsMgr.2012</ID>
+        <Version>8.0.0.2451</Version>
+        <PublicKeyToken>65c40f14a98ce59b</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <ModuleTypes>
+      <WriteActionModuleType ID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction" Accessibility="Internal" RunAs="System!System.PrivilegedMonitoringAccount" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="hostName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="sensorType" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="typeDisplayName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="ListSensors" TypeID="System!System.CommandExecuter">
+                <ApplicationName>%windir%\system32\cscript.exe</ApplicationName>
+                <WorkingDirectory />
+                <CommandLine>/nologo $File/ListHostSensors.js$ $Config/hostName$ $Config/sensorType$ "$Config/typeDisplayName$"</CommandLine>
+                <TimeoutSeconds>300</TimeoutSeconds>
+                <RequireOutput>true</RequireOutput>
+                <Files>
+                  <File>
+                    <Name>ListHostSensors.js</Name>
+                    <Contents><![CDATA[//ListHostSensors.js
+var ARGUMENT_COUNT = 3;
+
+if (WScript.Arguments.length != ARGUMENT_COUNT) {
+    WScript.Quit(0);
+}
+
+var hostName = WScript.Arguments(0);
+var sensorType = WScript.Arguments(1);
+var typeDisplayName = WScript.Arguments(2);
+
+var sensorsByTypeDict = new ActiveXObject("Scripting.Dictionary");
+
+var wql = "";
+if (sensorType == "power") {
+    wql = "SELECT sensorName, sensorType, healthState FROM SensorStats WHERE hostName = '" + hostName + "' AND (sensorType = 'power' OR sensorType = 'voltage')";
+} else if (sensorType == "SENSOR") {
+    wql = "SELECT sensorName, sensorType, healthState FROM SensorStats WHERE hostName = '" + hostName + "' AND sensorType <> 'power' AND sensorType <> 'voltage' AND sensorType <> 'fan' AND sensorType <> 'Memory' AND sensorType <> 'Processors' AND sensorType <> 'Storage' AND sensorType <> 'temperature'";
+} else if (sensorType == "ALL") {
+    wql = "SELECT sensorName, sensorType, healthState FROM SensorStats WHERE hostName = '" + hostName + "'";
+} else {
+    wql = "SELECT sensorName, sensorType, healthState FROM SensorStats WHERE hostName = '" + hostName + "' AND sensorType = '" + sensorType + "'";
+}
+
+var items = GetObject("winmgmts:\\\\.\\root\\nworks").ExecQuery(wql);
+for (enumItems = new Enumerator(items); !enumItems.atEnd(); enumItems.moveNext()) {
+    var item = enumItems.item();
+    var colProps = new Enumerator(item.Properties_);
+    var sName = "";
+    var sHealthState = "";
+    var sType = "";
+    for (; !colProps.atEnd(); colProps.moveNext()) {
+        var p = colProps.item();
+        if (p.Name == "sensorName")
+            sName = p.Value + "";
+        if (p.Name == "healthState")
+            sHealthState = p.Value + "";
+        if (p.Name == "sensorType")
+            sType = p.Value + "";
+    }
+
+    if (!sensorsByTypeDict.Exists(sType)) {
+        sensorsByTypeDict.Item(sType) = new ActiveXObject("Scripting.Dictionary");
+    }
+
+    if (!sensorsByTypeDict.Item(sType).Exists(sHealthState)) {
+        sensorsByTypeDict.Item(sType).Item(sHealthState) = new Array();
+    }
+
+    sensorsByTypeDict.Item(sType).Item(sHealthState).push(sName);
+}
+
+var msg = "";
+for (var i = 0; i < sensorsByTypeDict.Keys().toArray().length; i++) {
+    var statuses = sensorsByTypeDict.Item(sensorsByTypeDict.Keys().toArray()[i]);
+    var typePart = "Sensors in RED state:\r\n";
+    var k = 0;
+    var sensors = new Array();
+    if (statuses.Exists("red")) {
+        sensors = statuses.Item("red");
+        for (k = 0; k < sensors.length; k++) {
+            typePart += sensors[k] + "\r\n";
+        }
+        typePart += "\r\n";
+    } else {
+        typePart += "NONE\r\n\r\n";
+    }
+
+    typePart += "Sensors in YELLOW state:\r\n";
+    if (statuses.Exists("yellow")) {
+        sensors = statuses.Item("yellow");
+        for (k = 0; k < sensors.length; k++) {
+            typePart += sensors[k] + "\r\n";
+        }
+        typePart += "\r\n";
+    } else {
+        typePart += "NONE\r\n\r\n";
+    }
+
+    typePart += "Sensors in GREEN state:\r\n";
+    if (statuses.Exists("green")) {
+        sensors = statuses.Item("green");
+        for (k = 0; k < sensors.length; k++) {
+            typePart += sensors[k] + "\r\n";
+        }
+        typePart += "\r\n";
+    } else {
+        typePart += "NONE\r\n\r\n";
+    }
+
+    for (var j = 0; j < statuses.Keys().toArray().length; j++) {
+        var currState = statuses.Keys().toArray()[j];
+        if (currState == "red" || currState == "yellow" || currState == "green")
+            continue;
+        typePart += "\r\n";
+        typePart += "Sensors in '" + currState + "' state:\r\n";
+
+        sensors = statuses.Item(currState);
+        for (k = 0; k < sensors.length; k++) {
+            typePart += sensors[k] + "\r\n";
+        }
+    }
+
+    if (sensorType == "SENSOR" || sensorType == "ALL" || sensorType == "power")
+        msg += "Sensors of type '" + sensorsByTypeDict.Keys().toArray()[i] + "' are listed below:\r\n";
+    msg += typePart + "\r\n\r\n";
+}
+
+var header = "";
+switch (sensorType) {
+    case "SENSOR":
+        header = "All other hardware sensors on this Host are listed below, with their type and status:\r\n\r\n";
+        break;
+    case "ALL":
+        header = "All hardware sensors on this Host are listed below, with their type and status:\r\n\r\n";
+        break;
+    default:
+        header = "All hardware sensors of class '" + typeDisplayName + "' on this Host are listed below, with their status:\r\n\r\n";
+}
+
+WScript.echo(header);
+WScript.echo(msg);
+]]></Contents>
+                    <Unicode>false</Unicode>
+                  </File>
+                </Files>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="ListSensors" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.CommandOutput</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Rules>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Amps" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Amps</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Amps</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Percentage" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Percentage</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Percentage</Pattern>
+                  </RegExExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='sensorType']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>power</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Volts" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Volts</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Volts</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Watts" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Watts</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Watts</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.DegreeC" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Degrees C</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Degrees C</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.Percentage" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ConfirmDelivery="true" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.CommonPerformanceDataSource">
+            <ObjectName>VMHost-Sensor</ObjectName>
+            <CounterName>Percentage</CounterName>
+            <InstanceName>$Data/Property[@Name='sensorName']$</InstanceName>
+            <Value>$Data/Property[@Name='actualValue']$</Value>
+            <ClassName>SENSORSTATS</ClassName>
+            <FilterExpression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='hostName']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='baseUnits']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>Percentage</Pattern>
+                  </RegExExpression>
+                </Expression>
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='sensorType']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>temperature</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </And>
+            </FilterExpression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+    </Rules>
+    <Tasks>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.ALL.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>ALL</sensorType>
+          <typeDisplayName>ALL</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>fan</sensorType>
+          <typeDisplayName>Fan</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>Memory</sensorType>
+          <typeDisplayName>Ram DIMM</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>power</sensorType>
+          <typeDisplayName>Power</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>Processors</sensorType>
+          <typeDisplayName>Proc</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>SENSOR</sensorType>
+          <typeDisplayName>Sensor</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>Storage</sensorType>
+          <typeDisplayName>Disk</typeDisplayName>
+        </WriteAction>
+      </Task>
+      <Task ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.ListAll.Task" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" Timeout="86400" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="WA" TypeID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <hostName>$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</hostName>
+          <sensorType>temperature</sensorType>
+          <typeDisplayName>Temperature</typeDisplayName>
+        </WriteAction>
+      </Task>
+    </Tasks>
+    <Monitors>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">FAN</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">FAN</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">FAN</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">RAM</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">RAM</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">RAM</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">POWER</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">POWER</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">POWER</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">PROC</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">PROC</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">PROC</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">SENSOR</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">SENSOR</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">SENSOR</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">DISK</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">DISK</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">DISK</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+      <UnitMonitor ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged" Accessibility="Public" Enabled="onEssentialMonitoring" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" ParentMonitorID="SystemHealth!System.Health.ConfigurationState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.3SingleEventLog3StateUnitMonitorType" ConfirmDelivery="true">
+        <Category>ConfigurationHealth</Category>
+        <AlertSettings AlertMessage="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged_AlertMessageResourceID">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>High</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+          <AlertParameters>
+            <AlertParameter1>$Data/Context/Params/Param[11]$</AlertParameter1>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Error" />
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="ThirdEventRaised" MonitorTypeStateID="ThirdEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstComputerName>.</FirstComputerName>
+          <FirstLogName>Veeam Collector</FirstLogName>
+          <FirstExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>102</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">TEMP</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </FirstExpression>
+          <SecondComputerName>.</SecondComputerName>
+          <SecondLogName>Veeam Collector</SecondLogName>
+          <SecondExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>101</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">TEMP</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </SecondExpression>
+          <ThirdComputerName>.</ThirdComputerName>
+          <ThirdLogName>Veeam Collector</ThirdLogName>
+          <ThirdExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery>EventDisplayNumber</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value>100</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[9]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">TEMP</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">Params/Param[5]</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="String">$Target/Host/Property[Type="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST"]/id$</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </ThirdExpression>
+        </Configuration>
+      </UnitMonitor>
+    </Monitors>
+    <Overrides>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareSystemBoardStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareSystemBoardStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.BatteryStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.BatteryStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareFanStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareFanStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwarePowerStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwarePowerStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareTemperatureStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareTemperatureStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareVoltageStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HardwareVoltageStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HostMemoryStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.HostMemoryStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.OtherHostHardwareStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.OtherHostHardwareStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+      <MonitorPropertyOverride ID="Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.ProcessorStatus.AlertOverride" Context="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" Enforced="false" Monitor="VeeamVEVMwareMonitoring!Veeam.Virt.Extensions.VMware.VC4Alarm.HOST.ProcessorStatus" Property="Enabled">
+        <Value>false</Value>
+      </MonitorPropertyOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <Views>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.Dashboard" Accessibility="Public" Enabled="true" Target="System!System.Entity" TypeID="SC!Microsoft.SystemCenter.DashboardViewType" Visible="true">
+        <Category>Operations</Category>
+        <PanelConfiguration Columns="2" Rows="2">
+          <Cell Column="1" Row="1" ViewID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.TemperatureSensors" />
+          <Cell Row="1" Column="2" ViewID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsWatts" />
+          <Cell Row="2" Column="1" ViewID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsAmps" />
+          <Cell Row="2" Column="2" ViewID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.VoltageSensors" />
+        </PanelConfiguration>
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsPercentage" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+          <Counter>Percentage</Counter>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsAmps" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+          <Counter>Amps</Counter>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsWatts" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+          <Counter>Watts</Counter>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.SensorCounters" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.TemperatureSensors" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+      <View ID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.VoltageSensors" Accessibility="Public" Enabled="true" Target="VeeamVEVMwareLib!Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <Object>VMHost-Sensor</Object>
+          <Counter>Volts</Counter>
+        </Criteria>
+        <Presentation />
+        <Target />
+      </View>
+    </Views>
+    <FolderItems>
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.SensorCounters" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.All.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.VoltageSensors" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.powerVolts.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsPercentage" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.powerPercentage.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsAmps" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.powerApms.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsWatts" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.powerWatts.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+      <FolderItem ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.TemperatureSensors" ID="Veeam.Virt.Extensions.VMware.VMHOST.hardware.View.Perf.temperature.ID" Folder="VVEVVO2!Veeam.Virt.Extensions.VMware.VMHOST.PerformanceViews.hardware.Folder" />
+    </FolderItems>
+    <StringResources>
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged_AlertMessageResourceID" />
+      <StringResource ID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged_AlertMessageResourceID" />
+    </StringResources>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Fan Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Fan Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Fan Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Ram DIMM Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Ram DIMM Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Ram DIMM Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Power Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Power Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Power Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Processor Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Processor Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Processor Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Sensor Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Sensor Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Sensor Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Disk Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Disk Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Disk Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged">
+          <Name>Veeam VMware: vSphere Host Hardware Temperature Sensor Status</Name>
+          <Description>Veeam VMware: vSphere Host Hardware Temperature Sensor Status</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged" SubElementID="FirstEventRaised">
+          <Name>FirstEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged" SubElementID="SecondEventRaised">
+          <Name>SecondEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged" SubElementID="ThirdEventRaised">
+          <Name>ThirdEventRaised</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged_AlertMessageResourceID">
+          <Name>Veeam VMware: vSphere Host Hardware Temperature Sensor Status</Name>
+          <Description>{0}</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.ALL.ListAll.Task">
+          <Name>List All Hardware Sensors</Name>
+          <Description>List All Hardware Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.ListAll.Task">
+          <Name>List All Fan Sensors</Name>
+          <Description>List All Fan Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.ListAll.Task">
+          <Name>List All Ram DIMM Sensors</Name>
+          <Description>List All Ram DIMM Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.ListAll.Task">
+          <Name>List All Power Sensors</Name>
+          <Description>List All Power Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.ListAll.Task">
+          <Name>List All Proc Sensors</Name>
+          <Description>List All Proc Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.ListAll.Task">
+          <Name>List All Sensors</Name>
+          <Description>List All Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.ListAll.Task">
+          <Name>List All Disk Sensors</Name>
+          <Description>List All Disk Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.ListAll.Task">
+          <Name>List All Temperature Sensors</Name>
+          <Description>List All Temperature Sensors Task</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.Monitoring.Hardware">
+          <Name>Veeam VMware Advanced ESXi Hardware Monitoring (CIM-based)</Name>
+          <Description>
+            Veeam Advanced ESXi Hardware Monitoring (CIM-based). For details see the Veeam MP Help Center: http://www.veeam.com/documentation-guides-datasheets.html?prd=mp.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.ListHostSensors.WriteAction">
+          <Name>Veeam vSphere Host Sensors Write Action</Name>
+          <Description>Veeam vSphere Host Sensors Write Action Module</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Amps">
+          <Name>SENSOR.POWER.Collect.actualValue.Amps</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Percentage">
+          <Name>SENSOR.POWER.Collect.actualValue.Percentage</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Volts">
+          <Name>SENSOR.POWER.Collect.actualValue.Volts</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Watts">
+          <Name>SENSOR.POWER.Collect.actualValue.Watts</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.DegreeC">
+          <Name>SENSOR.TEMPERATURE.Collect.actualValue.DegreeC</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.Percentage">
+          <Name>SENSOR.TEMPERATURE.Collect.actualValue.Percentage</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.Dashboard">
+          <Name>Hardware Performance Dashboard</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsPercentage">
+          <Name>Power sensors [Percent]</Name>
+          <Description>All power sensors reporting Percent</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsAmps">
+          <Name>Power sensors [Amps]</Name>
+          <Description>All power sensors reporting Current</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.PowerSensorsWatts">
+          <Name>Power sensors [Watts]</Name>
+          <Description>All power sensors reporting Wattage</Description>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.SensorCounters">
+          <Name>All hardware counters</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.TemperatureSensors">
+          <Name>Temperature sensors</Name>
+        </DisplayString>
+        <DisplayString ElementID="Veeam.Virt.Extensions.VMware.VMHOST.Hardware.View.Performance.VoltageSensors">
+          <Name>Power sensors [Volts]</Name>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored Disk hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored Fan hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored Power hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored Processor hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored RAM DIMM hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored Temperature hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.ALL.ListAll.Task" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This task will output all currently monitored hardware sensors available on the vSphere host.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.STORAGE.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Local Disk class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A Yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the alert description. All sensors in either Red or Yellow status for Local Disk class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.FAN.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Fan class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the alert description. All sensors in either Red or Yellow status for Fan class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.POWER.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Power class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the Alert Description. All sensors in either Red or Yellow status for Power class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.PROCESSORS.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Processor class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the alert description. All sensors in either Red or Yellow status for Processor class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agentless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.MEMORY.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of RAM DIMM class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the alert description. All sensors in either Red or Yellow status for RAM DIMM class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.SENSOR.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Hardware Sensors class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the Alert Description. All sensors in either Red or Yellow status for Hardware Sensors class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMHOST.VMSENSORCONTAINER.TEMPERATURE.Monitor.StatusChanged" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>One or more Hardware Sensors of Temperature class have entered alert status. The list of sensors in yellow/red status is given in the alert description.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Causes</maml:title>
+              <maml:para>The thresholds for onboard hardware sensors are built-in to the sensor either by the manufacturer (embedded in firmware or hard-coded), or by VMware via the ESX(i) build.</maml:para>
+              <maml:para>A yellow status for a sensor usually indicates loss of redundancy, imminent failure, impeded functionality or performance, or other non-critical issue.</maml:para>
+              <maml:para>A Red status for a sensor usually indicates component failure, loss of functionality, serious impact to functionality or performance, or other critical issue.</maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Resolutions</maml:title>
+              <maml:para>Review the exact sensor(s) and their status in the Alert Description. All sensors in either Red or Yellow status for Temperature class will be listed. Review manufacturers guidelines for this specific hardware platform and act accordingly. It may be pro-active to migrate virtual machines to an alternative vSphere host before a further possible catastrophic hardware failure.</maml:para>
+              <maml:para>
+                The Veeam MP collects hardware data via agenetless vendor-agnostic method using CIM standards as defined by the Distributed Management Task Force (see <maml:navigationLink><maml:linkText>www.dmtf.org</maml:linkText><maml:uri href="http://www.dmtf.org/" /></maml:navigationLink>).
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.Monitoring.Hardware" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>Veeam VMware Advanced ESXi Hardware Monitoring (CIM-based) MP, part of Veeam Management Pack for System Center.</maml:para>
+              <maml:para>See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.</maml:para>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Amps" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from POWER sensors where the metric is delivered as Amps.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Watts" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from POWER sensors where the metric is delivered as Watts.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.DegreeC" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from TEMPERATURE sensors where the metric is delivered as Degree C.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.TEMPERATURE.Collect.actualValue.Percentage" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from TEMPERATURE sensors where the metric is delivered as Percentage.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Volts" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from POWER sensors where the metric is delivered as Volts.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+        <KnowledgeArticle ElementID="Veeam.Virt.Extensions.VMware.VMSENSOR.POWER.Collect.actualValue.Percentage" Visible="true">
+          <MamlContent>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>Summary</maml:title>
+              <maml:para>This rule will dynamically collect metrics from POWER sensors where the metric is delivered as Percentage.</maml:para>
+              <maml:para>Available units are:</maml:para>
+              <maml:para>For VMSENSOR.POWER class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Volts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Watts</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Amps</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>For VMSENSOR.TEMPERATURE class:</maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>Degrees C</maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>Percentage</maml:para>
+                </maml:listItem>
+              </maml:list>
+              <maml:para>Note that the available units does not always intuitively follow the class name. For example even though the sensor class may be VOLTAGE, it can in certain hardware configurations provide metrics as Watts or Amps, depending on the exact sensor type. This is an idiosyncracy of the SMASH sensors as implemented by the hardware vendor.</maml:para>
+              <maml:para>Disabling this rule will stop collection of the metric into Ops Mgr and it will not be visible in views and reports. However any monitor based on the same metric will continue to function.</maml:para>
+              <maml:para>
+                To see all metrics collected in this class check the <maml:navigationLink><maml:linkText>Veeam MP for VMware Metric Dictionary</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/index.html?sensorstats.html" /></maml:navigationLink>.
+              </maml:para>
+              <maml:para>
+                Use the <maml:navigationLink><maml:linkText>Alerts View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.AlertView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see all current open issues for this object. Use the <maml:navigationLink><maml:linkText>Events View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.EventView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to review any error and warning events for this object. Open a <maml:navigationLink><maml:linkText>Performance View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.PerformanceView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to see the performance metrics for this object and all contained objects. Open a <maml:navigationLink><maml:linkText>Diagram View</maml:linkText><maml:uri condition="View" href="Microsoft.SystemCenter.DiagramView&amp;viewtarget={$TARGET$}" uri="MOM.Console.Exe" /></maml:navigationLink> to analyze the relationships of this object to other components.
+              </maml:para>
+            </maml:section>
+            <maml:section xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+              <maml:title>External</maml:title>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>Help Center</maml:linkText><maml:uri href="https://www.veeam.com/documentation-guides-datasheets.html?prd=mp" /></maml:navigationLink> for more information including reference lists of <maml:navigationLink><maml:linkText>all Rules and Monitors</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_reference/" /></maml:navigationLink> and full set of <maml:navigationLink><maml:linkText>User Guides</maml:linkText><maml:uri href="https://helpcenter.veeam.com/docs/mp/vmware_guide/" /></maml:navigationLink> for the Veeam MP for VMware.
+              </maml:para>
+              <maml:para>
+                See the <maml:navigationLink><maml:linkText>VMware Online Documentation</maml:linkText><maml:uri href="http://www.vmware.com/support/pubs/vsphere-esxi-vcenter-server-pubs.html" /></maml:navigationLink> for more information on VMware vSphere, in particular:
+              </maml:para>
+              <maml:list>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Troubleshooting Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.troubleshooting.doc/GUID-F7638736-6B19-41DA-88C5-6F510254FE99.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Resource Management Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.resmgmt.doc/GUID-98BD5A8A-260A-494F-BAAE-74781F5C4B87.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Networking Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.networking.doc/GUID-35B40B0B-0C13-43B2-BC85-18C9C91BE2D4.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+                <maml:listItem>
+                  <maml:para>
+                    <maml:navigationLink>
+                      <maml:linkText>Storage Guide</maml:linkText>
+                      <maml:uri href="http://pubs.vmware.com/vsphere-60/topic/com.vmware.vsphere.storage.doc/GUID-8AE88758-20C1-4873-99C7-181EF9ACFA70.html" />
+                    </maml:navigationLink>
+                  </maml:para>
+                </maml:listItem>
+              </maml:list>
+            </maml:section>
+          </MamlContent>
+        </KnowledgeArticle>
+      </KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

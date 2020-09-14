@@ -1,0 +1,1021 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "resourcegroup": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "subscriptionId": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspace": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspaceapiversion": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "[parameters('workspaceapiversion')]",
+            "name": "[parameters('workspace')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "location": "[parameters('location')]",
+            "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]",
+            "resources": [
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "Veeam Morning Coffee Dashboard for Hyper-V",
+                    "type": "views",
+                    "location": "[parameters('location')]",
+                    "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'),'/views/Veeam Morning Coffee Dashboard for Hyper-V')]",
+                    "dependson": [
+                        "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]"
+                    ],
+                    "properties": {
+                        "Id": "Veeam Morning Coffee Dashboard for Hyper-V",
+                        "Name": "Veeam Morning Coffee Dashboard for Hyper-V",
+                        "Author": "www.veeam.com",
+                        "Source": "Local",
+                        "Dashboard": [
+						{
+                                "Id": "InformationBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "Title": "",
+                                        "NewGroup": false,
+                                         "Color": "#007233"
+                                    },
+                                    "Header": {
+                                        "Image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTM4IDc5LjE1OTgyNCwgMjAxNi8wOS8xNC0wMTowOTowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0iOTIxOUU2QUI5NTNCMzFBMjI5N0JCNUZGM0NENzE1MjIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RTEzODRGNENGODMzMTFFNjkxMTZDMDQ2OEFBOEEzQzgiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RTEzODRGNEJGODMzMTFFNjkxMTZDMDQ2OEFBOEEzQzgiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTcgKFdpbmRvd3MpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6NTVhNmU1ZjgtNzdkYi1lNDRkLWI0MWEtNGZiNDY0YTE0MWI0IiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6MzYzNWU5YTAtZjI5YS0xMWU2LWIzZjctZjhjMzcwMmIzZWE3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+QO6SFwAABDJJREFUeNrsmEtIW0EUho0mWrWaaETrK8VIhfqkYCORio9FqYKurIJiQbpQovhGBasLXaigoAiCG1E3LooIIlQLPqCLamnR4EK60YXaYpX6wgdRk/52yhjvTWIsVaieQ7jMPXPO3PvNOXNmbiQmk8nhLomEgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAmYgAn4bgI7mMwkc/wFfqydl5fHDKqqqkwXZXNz09XVlfUuLCwsLS3FxsZaHHx4eJi5DAwMyOVysQGU6F1eXrbxhhkZGfv7+zCbm5uzn0smkzU1NZlEYhV4dnaWefr6+hoMBnOz5uZm1pWamrq3txcaGvonWySS4ODgh2YyPj4O+9HRUf4e7u7u5gZRUVEwWFlZeSgSPJd7lZeXmwO7uLhwM39/f4HS09OTOw4NDdkLDNFoNGK34+PjwMBApp+cnGxra2PthISEtbU18YwajcaIiAhm09raKpg729LR0WGeCBw4MTGR24iVeGJDQwNTpqenXwEYecjc0tLSuHJwcJApkca41Wq17BZpafGlFxcXxW9pp5yenvJwbW1t2QkMOTg4YEqWQeYitbEMsrKyKisrNzY2xsbGVldXg4KCoOzs7GS91dXVuOr1elyxpKenp8UjpKSkMAOIs7NzX1+fwADKnJwcVkqQ+RMTE9vb2+YGYP6LwsRLjAV3GxGG1NXVMTNWAGZmZtitWq0+OTk5PDy0/WAUre7ubhsGLFeR56hMtoe6UoT51hMeHn6FCEMKCwtbWlowT729vYDn4UXknZycHB0dUagwCq4qlUrs7ubmhlrC2h4eHt7e3gIDlrFdXV0jIyNoYEwkBby4wdTU1O7u7k1sS+fKzExm2d/fL5WeTZBSqcQiYb0hISHQgJxrBILCxtxzc3OtrVVeCJDzgq6YmJh/G2HHS2ekuLiYNQoKCpDGaJSUlPBFkpycjCsKo3h9MomLi8NWhAaW6Pr6ukUbvjT4Dnd9Ir3UAjOHWocDxtHREasHOp2O95aVlSHyyPnS0lIcSOLj45GWvDcyMtLHxwfror29fWdnJykpqb6+PiAg4PzxUumz3zI/P4/b/Pz8mpoauHADeF37SctoPBWkQU9PD7cvKioS9PKt2NpJC+ckvqVbLFrYwP38/G6maFlI6S8/Pgg0WH4KhYIVlYqKCkEvChhOJkhdXp/EpQv7DUKHwobyJjZAzFH/s7Ozvby8bvTj4eX71LPHS50btD1K1we38tvhQoSjFI9x/XZiaPxY8On7hNFkvOWfh19/6t98rr1lhG+fv7Ma4TDv6KeKsNv9OXwBWOIg0T1pjPZU3RVgyH2ZvFbT9frRK/U9xV38iwefj/83noOE/sQjYAImYAImYAImYAImYAImYAImYAImYAImYAImYAImYAImYAImYAK2T34JMAAJX8+0nYZRRAAAAABJRU5ErkJggg==",
+                                        "Label": "Morning Coffee Dashboard for Hyper-V",
+                                        "Link": {
+                                            "Label": "More info",
+                                            "Url": "http://vee.am/mpoms80"
+                                        }
+                                    },
+                                    "List": [
+                                        {
+                                            "Title": "Overview",
+                                            "Content": "This View is based on data collected by Veeam Management Pack for System Center. You can get more details about Veeam Management Pack [here](http://vee.am/oms/mpoverview \"here\")"
+                                        },
+                                        {
+                                            "Title": "Troubleshooting",
+                                            "Content": "If you don't see any data check the following:\n\n    1. Operations Manager Server with Veeam MP\n    is connected as source to the OMS Workspace\n    2. Veeam Integration Pack for OMS has been\n    imported in Operations Manager\n    3. You have a valid license for Veeam MP\n    and Hyper-V servers are enabled for monitoring\n    \nFor troubleshooting guidelines, see the [Troubleshooting section](http://vee.am/mpoms80/hyperv \"Troubleshooting section\") of the Veeam MP for Hyper-V User Guide"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Hyper-V Virtual Machines",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Current Health State",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V Virtual Machine (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#eb3c00",
+                                                "#009e49",
+                                                "#fff100"
+                                            ],
+                                            "valueColorMapping": [
+                                                {
+                                                    "value": "_Total(Error)",
+                                                    "color": "#eb3c00"
+                                                },
+                                                {
+                                                    "value": "_Total(Warning)",
+                                                    "color": "#fff100"
+                                                },
+                                                {
+                                                    "value": "_Total(Success)",
+                                                    "color": "#009e49"
+                                                },
+                                                {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                            ]
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V Virtual Machine (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "VM Name",
+                                            "Value": "Active Alerts"
+                                        },
+                                        "Color": "#0072c6",
+                                        "operation": "Last Sample",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#eb3c00",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#eb3c00",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#eb3c00",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                                    }
+                                }
+                            },
+                          {
+                            "Id": "SingleQueryDonutBuilderBladeV1",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "Hyper-V Hosts",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Current Health State",
+                                "Subtitle": ""
+                              },
+                              "Donut": {
+                                "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "CenterLegend": {
+                                  "Text": "Total",
+                                  "Operation": "Sum",
+                                  "ArcsToSelect": [ ]
+                                },
+                                "Options": {
+                                  "colors": [
+                                    "#0072c6",
+                                    "#0072c6",
+                                    "#00bcf2"
+                                  ],
+                                  "valueColorMapping": [
+                                    {
+                                      "value": "_Total(Error)",
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "value": "_Total(Warning)",
+                                      "color": "#fff100"
+                                    },
+                                    {
+                                      "value": "_Total(Success)",
+                                      "color": "#009e49"
+                                    },
+                                    {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                  ]
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": false,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Host Name",
+                                  "Value": "Active Alerts"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": false,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#eb3c00",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": 60,
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": 90,
+                                      "color": "#eb3c00"
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                              }
+                            }
+                          },
+                          {
+                            "Id": "SingleQueryDonutBuilderBladeV1",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "Hyper-V Clusters",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Current Health State",
+                                "Subtitle": ""
+                              },
+                              "Donut": {
+                                "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V Cluster (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "CenterLegend": {
+                                  "Text": "Total",
+                                  "Operation": "Sum",
+                                  "ArcsToSelect": [ ]
+                                },
+                                "Options": {
+                                  "colors": [
+                                    "#0072c6",
+                                    "#0072c6",
+                                    "#00bcf2"
+                                  ],
+                                  "valueColorMapping": [
+                                    {
+                                      "value": "_Total(Error)",
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "value": "_Total(Warning)",
+                                      "color": "#fff100"
+                                    },
+                                    {
+                                      "value": "_Total(Success)",
+                                      "color": "#009e49"
+                                    },
+                                    {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                  ]
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V Cluster (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": false,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Cluster Name",
+                                  "Value": "Active Alerts"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": false,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#eb3c00",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": 60,
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": 90,
+                                      "color": "#eb3c00"
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                              }
+                            }
+                          },                          
+                          {
+                            "Id": "SingleQueryDonutBuilderBladeV1",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "Hyper-V SMB Volumes",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Current Health State",
+                                "Subtitle": ""
+                              },
+                              "Donut": {
+                                "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V SMB Volume (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "CenterLegend": {
+                                  "Text": "Total",
+                                  "Operation": "Sum",
+                                  "ArcsToSelect": [ ]
+                                },
+                                "Options": {
+                                  "colors": [
+                                    "#0072c6",
+                                    "#0072c6",
+                                    "#00bcf2"
+                                  ],
+                                  "valueColorMapping": [
+                                    {
+                                      "value": "_Total(Error)",
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "value": "_Total(Warning)",
+                                      "color": "#fff100"
+                                    },
+                                    {
+                                      "value": "_Total(Success)",
+                                      "color": "#009e49"
+                                    },
+                                    {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                  ]
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V SMB Volume (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": false,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Share Name",
+                                  "Value": "Active Alerts"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": false,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#eb3c00",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": 60,
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": 90,
+                                      "color": "#eb3c00"
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                              }
+                            }
+                          },
+                          {
+                            "Id": "SingleQueryDonutBuilderBladeV1",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "Hyper-V CSVs",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Current Health State",
+                                "Subtitle": ""
+                              },
+                              "Donut": {
+                                "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "CenterLegend": {
+                                  "Text": "Total",
+                                  "Operation": "Sum",
+                                  "ArcsToSelect": [ ]
+                                },
+                                "Options": {
+                                  "colors": [
+                                    "#0072c6",
+                                    "#0072c6",
+                                    "#00bcf2"
+                                  ],
+                                  "valueColorMapping": [
+                                    {
+                                      "value": "_Total(Error)",
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "value": "_Total(Warning)",
+                                      "color": "#fff100"
+                                    },
+                                    {
+                                      "value": "_Total(Success)",
+                                      "color": "#009e49"
+                                    },
+                                    {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                  ]
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": false,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                   "Name": "Volume Name",
+                                  "Value": "Active Alerts"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": false,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#eb3c00",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": 60,
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": 90,
+                                      "color": "#eb3c00"
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                              }
+                            }
+                          },
+                          {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "System Center VMM Servers",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Current Health State",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "Type=Perf CounterName=HealthState ObjectName=\"Hyper-V SCVMM Server (Veeam MP)\" InstanceName=_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#0072c6",
+                                                "#0072c6",
+                                                "#00bcf2"
+                                            ],
+                                            "valueColorMapping": [
+                                                {
+                                                    "value": "_Total(Error)",
+                                                    "color": "#eb3c00"
+                                                },
+                                                {
+                                                    "value": "_Total(Warning)",
+                                                    "color": "#fff100"
+                                                },
+                                                {
+                                                    "value": "_Total(Success)",
+                                                    "color": "#009e49"
+                                                },
+                                                {
+                                                    "value": "_Total(Uninitialized)",
+                                                    "color": "#e2e584"
+                                                },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                            ]
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V SCVMM Server (Veeam MP)\" InstanceName<>_Total* TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                           "Name": "Server Name",
+                                            "Value": "Active Alerts"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#eb3c00",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": 60,
+                                                    "color": "#eb3c00"
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": 90,
+                                                    "color": "#eb3c00"
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "Type:Alert AlertState!=Closed AlertName=Veeam*Hyper* SourceDisplayName In {Type:Perf {selected item} | measure count() by InstanceName}"
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "LineChartCalloutBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "CPU RESOURCE USAGE",
+                                        "newGroup": false,
+                                        "icon": "",
+                                        "useIcon": false
+                                    },
+                                    "Header": {
+                                        "Title": "Total CPU Usage",
+                                        "Subtitle": ""
+                                    },
+                                    "LineChart": {
+                                        "Query": "Type=Perf CounterName=\"% Total Run Time\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName=_Total | measure max(CounterValue) by InstanceName",
+                                        "Callout": {
+                                            "Title": "Avg per hour",
+                                            "Series": "",
+                                            "Operation": "Average"
+                                        },
+                                        "yAxis": {
+                                            "isLogarithmic": false,
+                                            "units": {
+                                                "baseUnitType": "",
+                                                "baseUnit": "",
+                                                "displayUnit": ""
+                                            },
+                                            "customLabel": ""
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "Type=Perf CounterName=\"% Total Run Time\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) by InstanceName",
+                                        "HideGraph": false,
+                                        "enableSparklines": true,
+                                        "operation": "Summary",
+                                        "ColumnsTitle": {
+                                           "Name": "Host Name",
+                                            "Value": "CPU Usage"
+                                        },
+                                        "Color": "#0072c6",
+                                        "thresholds": {
+                                            "isEnabled": true,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "Type=Perf CounterName=\"% Total Run Time\" ObjectName=\"Hyper-V Host (Veeam MP)\" {selected item} | measure avg(CounterValue) interval 1hour"
+                                    }
+                                }
+                            },
+                          {
+                            "Id": "LineChartCalloutBuilderBlade",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                 "title": "MEMORY RESOURCE USAGE",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Total Memory Usage",
+                                "Subtitle": ""
+                              },
+                              "LineChart": {
+                                "Query": "Type=Perf CounterName=\"% Memory Used\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName=_Total | measure max(CounterValue) by InstanceName",
+                                "Callout": {
+                                  "Title": "Avg per hour",
+                                  "Series": "",
+                                  "Operation": "Average"
+                                },
+                                "yAxis": {
+                                  "isLogarithmic": false,
+                                  "units": {
+                                    "baseUnitType": "",
+                                    "baseUnit": "",
+                                    "displayUnit": ""
+                                  },
+                                  "customLabel": ""
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=\"% Memory Used\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": true,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Host Name",
+                                 "Value": "RAM Usage"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": true,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#009e49",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": "60",
+                                      "color": "#fcd116",
+                                      "isDefault": false
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": "90",
+                                      "color": "#ba141a",
+                                      "isDefault": false
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type=Perf CounterName=\"% Memory Used\" ObjectName=\"Hyper-V Host (Veeam MP)\" {selected item} | measure avg(CounterValue) interval 1hour"
+                              }
+                            }
+                          },
+                          {
+                            "Id": "LineChartCalloutBuilderBlade",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "CSV STORAGE USAGE",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                "Title": "Total CSV Space Usage",
+                                "Subtitle": ""
+                              },
+                              "LineChart": {
+                                "Query": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\" InstanceName=_Total | measure max(CounterValue) by InstanceName",
+                                "Callout": {
+                                  "Title": "Avg per hour",
+                                  "Series": "",
+                                  "Operation": "Average"
+                                },
+                                "yAxis": {
+                                  "isLogarithmic": false,
+                                  "units": {
+                                    "baseUnitType": "",
+                                    "baseUnit": "",
+                                    "displayUnit": ""
+                                  },
+                                  "customLabel": ""
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": true,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Volume Name",
+                                  "Value": "Space Usage"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": true,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#009e49",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": "60",
+                                      "color": "#fcd116",
+                                      "isDefault": false
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": "90",
+                                      "color": "#ba141a",
+                                      "isDefault": false
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\" {selected item} | measure avg(CounterValue) interval 1hour"
+                              }
+                            }
+                          },
+                          {
+                            "Id": "LineChartCalloutBuilderBlade",
+                            "Type": "Blade",
+                            "Version": 0,
+                            "Configuration": {
+                              "General": {
+                                "title": "SMB STORAGE USAGE",
+                                "newGroup": false,
+                                "icon": "",
+                                "useIcon": false
+                              },
+                              "Header": {
+                                 "Title": "Total SMB Space Usage",
+                                "Subtitle": ""
+                              },
+                              "LineChart": {
+                                "Query": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V SMB Volume (Veeam MP)\" InstanceName=_Total | measure max(CounterValue) by InstanceName",
+                                "Callout": {
+                                  "Title": "Avg per hour",
+                                  "Series": "",
+                                  "Operation": "Average"
+                                },
+                                "yAxis": {
+                                  "isLogarithmic": false,
+                                  "units": {
+                                    "baseUnitType": "",
+                                    "baseUnit": "",
+                                    "displayUnit": ""
+                                  },
+                                  "customLabel": ""
+                                }
+                              },
+                              "List": {
+                                "Query": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V SMB Volume (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) by InstanceName",
+                                "HideGraph": false,
+                                "enableSparklines": true,
+                                "operation": "Summary",
+                                "ColumnsTitle": {
+                                  "Name": "Share Name",
+                                  "Value": "Space Usage"
+                                },
+                                "Color": "#0072c6",
+                                "thresholds": {
+                                  "isEnabled": true,
+                                  "values": [
+                                    {
+                                      "name": "Normal",
+                                      "threshold": "Default",
+                                      "color": "#009e49",
+                                      "isDefault": true
+                                    },
+                                    {
+                                      "name": "Warning",
+                                      "threshold": "60",
+                                      "color": "#fcd116",
+                                      "isDefault": false
+                                    },
+                                    {
+                                      "name": "Error",
+                                      "threshold": "90",
+                                      "color": "#ba141a",
+                                      "isDefault": false
+                                    }
+                                  ]
+                                },
+                                "NameDSVSeparator": "",
+                                "NavigationQuery": "Type=Perf CounterName=\"% Used Space\" ObjectName=\"Hyper-V SMB Volume (Veeam MP)\" {selected item} | measure avg(CounterValue) interval 1hour"
+                              }
+                            }
+                          },
+                            {
+                                "Id": "NotableQueriesBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "List of queries",
+                                        "newGroup": false,
+                                        "preselectedFilters": "Type, Computer",
+                                        "renderMode": "grid"
+                                    },
+                                    "queries": [
+                                        {
+                                            "query": "Type=Perf CounterName=HealthState InstanceName<>_Total* | measure countdistinct(InstanceName) by ObjectName | sort ObjectName",
+                                            "displayName": "Veeam MP Objects in OMS:"
+                                        },
+                                        {
+                                            "query": "Type=Perf CounterName=HealthState  ObjectName=Hyper-V* InstanceName=_Total* | measure max(CounterValue) by InstanceName interval 1hour | display StackedBarChart",
+                                            "displayName": "Objects Health State History:"
+                                        },                                        
+                                        {
+                                            "query": "Type=Alert SourceDisplayName IN {Type=Perf CounterName= \"% Memory Used\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) as RAM by InstanceName | where RAM>90}",
+                                            "displayName": "All Alerts past 24 hours for Hosts under RAM pressure: "
+                                        },
+                                        {
+                                            "query": "Type=Alert SourceDisplayName IN {Type=Perf CounterName= \"% Total Run Time\" ObjectName=\"Hyper-V Host (Veeam MP)\" InstanceName<>_Total | measure avg(CounterValue) as CPU by InstanceName | where CPU>90}",
+                                            "displayName": "All Alerts past 24 hours for Hosts under CPU pressure:"
+                                        },
+										{
+                                            "query": "Type=Alert SourceDisplayName IN { Type=Perf CounterName=\"% Used Space\" (ObjectName=\"Hyper-V Cluster Shared Volume (Veeam MP)\"  OR ObjectName=\"Hyper-V SMB Volume (Veeam MP)\") InstanceName<>_Total | measure avg(CounterValue) as Space by InstanceName | where Space>90}",
+                                            "displayName": "All Alerts past 24 hours for Storage under Space pressure:"
+                                        },
+                                        {
+                                            "query": "Type=Perf CounterName=Alerts ObjectName=\"Hyper-V Host (Veeam MP)\"  InstanceName<>_Total* | measure avg(CounterValue) by InstanceName interval 1hour | display StackedBarChart",
+                                            "displayName": "Average number of alerts for Hosts:"
+                                        },
+                                        {
+                                            "query": "Type=Perf InstanceName=\"<example>\" CounterName=HealthState CounterValue=3 ObjectName=\"Hyper-V Host (Veeam MP)\"  InstanceName!=_Total* | measure sum(product(div(div(CounterValue,3),96),100)) by InstanceName interval 1day | display StackedBarChart",
+                                            "displayName": "Host <example>  daily downtime %:"
+                                        },
+                                        {
+                                            "query": "Type=Alert (AlertSeverity=error or AlertSeverity=critical) AlertName=Veeam*Hyper* TimeGenerated>NOW-24HOUR",
+                                            "displayName": "Critical Veeam Hyper-V Alerts Raised past 24 hours:"
+                                        }
+                                    ]
+                                }
+                            }                        
+                        ],
+                       "OverviewTile": {
+                            "Id": "SingleQueryDonutBuilderTileV1",
+                            "Type": "OverviewTile",
+                            "Version": 0,
+                            "Configuration": {
+                                "Donut": {
+                                        "Query": "Type=Perf CounterName=HealthState ObjectName=\"Veeam Hyper-V TotalObjects\" TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "CenterLegend": {
+                                            "Text": "Total",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#eb3c00",
+                                                "#009e49",
+                                                "#fff100"
+                                            ],
+                                            "valueColorMapping": [
+                                    {
+                                      "value": "_Total(Error)",
+                                      "color": "#eb3c00"
+                                    },
+                                    {
+                                      "value": "_Total(Warning)",
+                                      "color": "#fff100"
+                                    },
+                                    {
+                                      "value": "_Total(Success)",
+                                      "color": "#009e49"
+                                    },
+                                    {
+                                      "value": "_Total(Uninitialized)",
+                                      "color": "#e2e584"
+                                    },
+									{
+                                      "value": "_Total(MaintenanceMode)",
+                                      "color": "#0072c6"
+                                    },
+									{
+                                      "value": "_Total(UnAvailable)",
+                                      "color": "#68217a"
+                                    }
+                                  ]
+                                        }
+                                    },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": true,
+                                        "Query": "Type=Perf CounterName=HealthState ObjectName=\"Veeam Hyper-V TotalObjects\" TimeGenerated:[NOW-15minutes..NOW] | measure max(CounterValue) by InstanceName",
+                                        "Message": "Latest Veeam Management Pack datapoint not found.\nCheck that Operations Manager server with \nVeeam Management Pack is connected \nto the workspace. \nCheck the following [guide](http://vee.am/mpoms80/troubleshooting \"guide\") for more information.\n"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
